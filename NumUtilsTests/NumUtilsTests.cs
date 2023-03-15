@@ -1,19 +1,15 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Reflection;
-
 using NumUtils.NelderMeadSimplex;
 
 namespace NumUtilsTests
 {
     public class NumUtilsTests
     {
-        public static void Main(string[] args)
+        public static void Main()
         {
             Console.WriteLine("Starting first simplex test...");
-            _simplexTest1();
-            _simplexTest2();
+            SimplexTest1();
+            SimplexTest2();
             Console.WriteLine("Hit any key to exit...");
             Console.ReadKey();
         }
@@ -21,18 +17,18 @@ namespace NumUtilsTests
         /// <summary>
         /// Test to see if we can fit a parabola
         /// </summary>
-        static void _simplexTest1()
+        static void SimplexTest1()
         {
             Console.WriteLine("Starting SimplexTest1");
             var constants = new[] { new SimplexConstant(3, 1), new SimplexConstant(5, 1) };
             const double tolerance = 1e-6;
             const int maxEvals = 1000;
-            var objFunction = new ObjectiveFunctionDelegate(_objFunction1);
+            var objFunction = new ObjectiveFunctionDelegate(ObjFunction1);
             var result = NelderMeadSimplex.Regress(constants, tolerance, maxEvals, objFunction);
-            _printResult(result);
+            PrintResult(result);
         }
 
-        static double _objFunction1(double[] constants)
+        static double ObjFunction1(double[] constants)
         {
             double a = 5;
             double b = 10;
@@ -55,7 +51,7 @@ namespace NumUtilsTests
         /// <summary>
         /// Test on the Rosenbrock function
         /// </summary>
-        static void _simplexTest2()
+        static void SimplexTest2()
         {
             Console.WriteLine("\n\nStarting SimplexTest2");
 
@@ -63,12 +59,12 @@ namespace NumUtilsTests
             var constants = new[] { new SimplexConstant(-1.2, .1), new SimplexConstant(1, .1)};
             var tolerance = 1e-10;
             var maxEvals = 1000;
-            var objFunction = new ObjectiveFunctionDelegate(_objFunction2);
+            var objFunction = new ObjectiveFunctionDelegate(ObjFunction2);
             var result = NelderMeadSimplex.Regress(constants, tolerance, maxEvals, objFunction);
-            _printResult(result);
+            PrintResult(result);
         }
 
-        static double _objFunction2(double[] constants)
+        static double ObjFunction2(double[] constants)
         {
             Console.Write("Called with x1={0} x2={1} ", constants[0], constants[1]);
             var err = 100 * Math.Pow((constants[1] - constants[0] * constants[0]), 2) + Math.Pow((1 - constants[0]), 2);
@@ -77,7 +73,7 @@ namespace NumUtilsTests
             return err;
         }
 
-        static void _printResult(RegressionResult result)
+        static void PrintResult(RegressionResult result)
         {
             // a bit of reflection fun, why not...
             var properties = result.GetType().GetProperties();

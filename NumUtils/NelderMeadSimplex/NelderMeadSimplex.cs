@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
-
 using NumUtils.Common;
 
 namespace NumUtils.NelderMeadSimplex
@@ -10,7 +7,7 @@ namespace NumUtils.NelderMeadSimplex
 
     public sealed class NelderMeadSimplex
     {
-        static readonly double JITTER = 1e-10d;           // a small value used to protect against floating point noise
+        const double JITTER = 1e-10d; // a small value used to protect against floating point noise
 
         public static RegressionResult Regress(SimplexConstant[] simplexConstants, double convergenceTolerance, int maxEvaluations, 
                                         ObjectiveFunctionDelegate objectiveFunction)
@@ -25,19 +22,18 @@ namespace NumUtils.NelderMeadSimplex
             // create the initial simplex
             var numDimensions = simplexConstants.Length;
             var numVertices = numDimensions + 1;
-            var vertices = _initializeVertices(simplexConstants);
-            var errorValues = new double[numVertices];
+            var vertices = InitializeVertices(simplexConstants);
 
             var evaluationCount = 0;
             var terminationReason = TerminationReason.Unspecified;
             ErrorProfile errorProfile;
 
-            errorValues = _initializeErrorValues(vertices, objectiveFunction);
+            var errorValues = InitializeErrorValues(vertices, objectiveFunction);
 
             // iterate until we converge, or complete our permitted number of iterations
             while (true)
             {
-               errorProfile = _evaluateSimplex(errorValues);
+               errorProfile = EvaluateSimplex(errorValues);
 
                 // see if the range in point heights is small enough to exit
                 if (_hasConverged(convergenceTolerance, errorProfile, errorValues))
@@ -47,12 +43,12 @@ namespace NumUtils.NelderMeadSimplex
                 }
 
                 // attempt a reflection of the simplex
-                var reflectionPointValue = _tryToScaleSimplex(-1.0, ref errorProfile, vertices, errorValues, objectiveFunction);
+                var reflectionPointValue = TryToScaleSimplex(-1.0, ref errorProfile, vertices, errorValues, objectiveFunction);
                 ++evaluationCount;
                 if (reflectionPointValue <= errorValues[errorProfile.LowestIndex])
                 {
                     // it's better than the best point, so attempt an expansion of the simplex
-                    var expansionPointValue = _tryToScaleSimplex(2.0, ref errorProfile, vertices, errorValues, objectiveFunction);
+                    var expansionPointValue = TryToScaleSimplex(2.0, ref errorProfile, vertices, errorValues, objectiveFunction);
                     ++evaluationCount;
                 }
                 else if (reflectionPointValue >= errorValues[errorProfile.NextHighestIndex])
@@ -60,7 +56,7 @@ namespace NumUtils.NelderMeadSimplex
                     // it would be worse than the second best point, so attempt a contraction to look
                     // for an intermediate point
                     var currentWorst = errorValues[errorProfile.HighestIndex];
-                    var contractionPointValue = _tryToScaleSimplex(0.5, ref errorProfile, vertices, errorValues, objectiveFunction);
+                    var contractionPointValue = TryToScaleSimplex(0.5, ref errorProfile, vertices, errorValues, objectiveFunction);
                     ++evaluationCount;
                     if (contractionPointValue >= currentWorst)
                     {
@@ -89,7 +85,7 @@ namespace NumUtils.NelderMeadSimplex
         /// </summary>
         /// <param name="vertices"></param>
         /// <returns></returns>
-        static double[] _initializeErrorValues(Vector[] vertices, ObjectiveFunctionDelegate objectiveFunction)
+        static double[] InitializeErrorValues(Vector[] vertices, ObjectiveFunctionDelegate objectiveFunction)
         {
             var errorValues = new double[vertices.Length];
             for (var i = 0; i < vertices.Length; i++)
@@ -103,30 +99,20 @@ namespace NumUtils.NelderMeadSimplex
         /// Check whether the points in the error profile have so little range that we
         /// consider ourselves to have converged
         /// </summary>
+        /// <param name="convergenceTolerance"></param>
         /// <param name="errorProfile"></param>
         /// <param name="errorValues"></param>
         /// <returns></returns>
-        static bool _hasConverged(double convergenceTolerance, ErrorProfile errorProfile, double[] errorValues)
-        {
-            var range = 2 * Math.Abs(errorValues[errorProfile.HighestIndex] - errorValues[errorProfile.LowestIndex]) /
-                        (Math.Abs(errorValues[errorProfile.HighestIndex]) + Math.Abs(errorValues[errorProfile.LowestIndex]) + JITTER);
-
-            if (range < convergenceTolerance)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
+        static bool _hasConverged(double convergenceTolerance, ErrorProfile errorProfile, double[] errorValues) =>
+            2 * Math.Abs(errorValues[errorProfile.HighestIndex] - errorValues[errorProfile.LowestIndex]) /
+            (Math.Abs(errorValues[errorProfile.HighestIndex]) + Math.Abs(errorValues[errorProfile.LowestIndex]) + JITTER) < convergenceTolerance;
 
         /// <summary>
         /// Examine all error values to determine the ErrorProfile
         /// </summary>
         /// <param name="errorValues"></param>
         /// <returns></returns>
-        static ErrorProfile _evaluateSimplex(double[] errorValues)
+        static ErrorProfile EvaluateSimplex(double[] errorValues)
         {
             var errorProfile = new ErrorProfile();
             if (errorValues[0] > errorValues[1])
@@ -167,7 +153,7 @@ namespace NumUtils.NelderMeadSimplex
         /// </summary>
         /// <param name="simplexConstants"></param>
         /// <returns></returns>
-        static Vector[] _initializeVertices(SimplexConstant[] simplexConstants)
+        static Vector[] InitializeVertices(SimplexConstant[] simplexConstants)
         {
             var numDimensions = simplexConstants.Length;
             var vertices = new Vector[numDimensions + 1];
@@ -200,11 +186,11 @@ namespace NumUtils.NelderMeadSimplex
         /// <param name="vertices"></param>
         /// <param name="errorValues"></param>
         /// <returns></returns>
-        static double _tryToScaleSimplex(double scaleFactor, ref ErrorProfile errorProfile, Vector[] vertices, 
+        static double TryToScaleSimplex(double scaleFactor, ref ErrorProfile errorProfile, Vector[] vertices, 
                                           double[] errorValues, ObjectiveFunctionDelegate objectiveFunction)
         {
             // find the centroid through which we will reflect
-            var centroid = _computeCentroid(vertices, errorProfile);
+            var centroid = ComputeCentroid(vertices, errorProfile);
 
             // define the vector from the centroid to the high point
             var centroidToHighPoint = vertices[errorProfile.HighestIndex].Subtract(centroid);
@@ -251,7 +237,7 @@ namespace NumUtils.NelderMeadSimplex
         /// <param name="vertices"></param>
         /// <param name="errorProfile"></param>
         /// <returns></returns>
-        static Vector _computeCentroid(Vector[] vertices, ErrorProfile errorProfile)
+        static Vector ComputeCentroid(Vector[] vertices, ErrorProfile errorProfile)
         {
             var numVertices = vertices.Length;
             // find the centroid of all points except the worst one
@@ -268,27 +254,11 @@ namespace NumUtils.NelderMeadSimplex
 
         sealed class ErrorProfile
         {
-            int _highestIndex;
-            int _nextHighestIndex;
-            int _lowestIndex;
+            public int HighestIndex { get; set; }
 
-            public int HighestIndex
-            {
-                get { return _highestIndex; }
-                set { _highestIndex = value; }
-            }
+            public int NextHighestIndex { get; set; }
 
-            public int NextHighestIndex
-            {
-                get { return _nextHighestIndex; }
-                set { _nextHighestIndex = value; }
-            }
-
-            public int LowestIndex
-            {
-                get { return _lowestIndex; }
-                set { _lowestIndex = value; }
-            }
+            public int LowestIndex { get; set; }
         }
     }
 }

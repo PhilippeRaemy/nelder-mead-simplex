@@ -1,34 +1,26 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace NumUtils.Common
 {
+    using System.Globalization;
+
     public class Vector
     {
-        double[] _components;
-        int _nDimensions;
         public Vector(int dimensions)
         {
-            _components = new double[dimensions];
-            _nDimensions = dimensions;
+            Components = new double[dimensions];
+            NDimensions = dimensions;
         }
 
-        public int NDimensions
-        {
-            get { return _nDimensions; }
-        }
+        public int NDimensions { get; }
 
         public double this[int index]
         {
-            get { return _components[index]; }
-            set { _components[index] = value; }
+            get => Components[index];
+            set => Components[index] = value;
         }
 
-        public double[] Components
-        {
-            get { return _components; }
-        }
+        public double[] Components { get; }
 
         /// <summary>
         /// Add another vector to this one
@@ -37,14 +29,12 @@ namespace NumUtils.Common
         /// <returns></returns>
         public Vector Add(Vector v)
         {
-            if (v.NDimensions != this.NDimensions)
+            if (v.NDimensions != NDimensions)
                 throw new ArgumentException("Can only add vectors of the same dimensionality");
 
             var vector = new Vector(v.NDimensions);
-            for (var i = 0; i < v.NDimensions; i++)
-            {
+            for (var i = 0; i < v.NDimensions; i++) 
                 vector[i] = this[i] + v[i];
-            }
             return vector;
         }
 
@@ -55,14 +45,12 @@ namespace NumUtils.Common
         /// <returns></returns>
         public Vector Subtract(Vector v)
         {
-            if (v.NDimensions != this.NDimensions)
+            if (v.NDimensions != NDimensions)
                 throw new ArgumentException("Can only subtract vectors of the same dimensionality");
 
             var vector = new Vector(v.NDimensions);
-            for (var i = 0; i < v.NDimensions; i++)
-            {
+            for (var i = 0; i < v.NDimensions; i++) 
                 vector[i] = this[i] - v[i];
-            }
             return vector;
         }
 
@@ -73,11 +61,9 @@ namespace NumUtils.Common
         /// <returns></returns>
         public Vector Multiply(double scalar)
         {
-            var scaledVector = new Vector(this.NDimensions);
-            for (var i = 0; i < this.NDimensions; i++)
-            {
+            var scaledVector = new Vector(NDimensions);
+            for (var i = 0; i < NDimensions; i++) 
                 scaledVector[i] = this[i] * scalar;
-            }
             return scaledVector;
         }
 
@@ -88,24 +74,20 @@ namespace NumUtils.Common
         /// <returns></returns>
         public double DotProduct(Vector v)
         {
-            if (v.NDimensions != this.NDimensions)
+            if (v.NDimensions != NDimensions)
                 throw new ArgumentException("Can only compute dot product for vectors of the same dimensionality");
 
             double sum = 0;
-            for (var i = 0; i < v.NDimensions; i++)
-            {
+            for (var i = 0; i < v.NDimensions; i++) 
                 sum += this[i] * v[i];
-            }
             return sum;
         }
 
         public override string ToString()
         {
-            var components = new string[_components.Length];
-            for (var i = 0; i < components.Length; i++)
-            {
-                components[i] = _components[i].ToString();
-            }
+            var components = new string[Components.Length];
+            for (var i = 0; i < components.Length; i++) 
+                components[i] = Components[i].ToString(CultureInfo.InvariantCulture);
             return "[ " + string.Join(", ", components) + " ]";
         }
     }

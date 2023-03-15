@@ -6,8 +6,8 @@ namespace NumUtils.Common
 {
     public class Vector
     {
-        private double[] _components;
-        private int _nDimensions;
+        double[] _components;
+        int _nDimensions;
         public Vector(int dimensions)
         {
             _components = new double[dimensions];
@@ -40,8 +40,8 @@ namespace NumUtils.Common
             if (v.NDimensions != this.NDimensions)
                 throw new ArgumentException("Can only add vectors of the same dimensionality");
 
-            Vector vector = new Vector(v.NDimensions);
-            for (int i = 0; i < v.NDimensions; i++)
+            var vector = new Vector(v.NDimensions);
+            for (var i = 0; i < v.NDimensions; i++)
             {
                 vector[i] = this[i] + v[i];
             }
@@ -58,8 +58,8 @@ namespace NumUtils.Common
             if (v.NDimensions != this.NDimensions)
                 throw new ArgumentException("Can only subtract vectors of the same dimensionality");
 
-            Vector vector = new Vector(v.NDimensions);
-            for (int i = 0; i < v.NDimensions; i++)
+            var vector = new Vector(v.NDimensions);
+            for (var i = 0; i < v.NDimensions; i++)
             {
                 vector[i] = this[i] - v[i];
             }
@@ -73,8 +73,8 @@ namespace NumUtils.Common
         /// <returns></returns>
         public Vector Multiply(double scalar)
         {
-            Vector scaledVector = new Vector(this.NDimensions);
-            for (int i = 0; i < this.NDimensions; i++)
+            var scaledVector = new Vector(this.NDimensions);
+            for (var i = 0; i < this.NDimensions; i++)
             {
                 scaledVector[i] = this[i] * scalar;
             }
@@ -92,7 +92,7 @@ namespace NumUtils.Common
                 throw new ArgumentException("Can only compute dot product for vectors of the same dimensionality");
 
             double sum = 0;
-            for (int i = 0; i < v.NDimensions; i++)
+            for (var i = 0; i < v.NDimensions; i++)
             {
                 sum += this[i] * v[i];
             }
@@ -101,8 +101,8 @@ namespace NumUtils.Common
 
         public override string ToString()
         {
-            string[] components = new string[_components.Length];
-            for (int i = 0; i < components.Length; i++)
+            var components = new string[_components.Length];
+            for (var i = 0; i < components.Length; i++)
             {
                 components[i] = _components[i].ToString();
             }

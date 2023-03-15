@@ -6,10 +6,10 @@ namespace NumUtils.NelderMeadSimplex
 {
     public sealed class RegressionResult
     {
-        private TerminationReason _terminationReason;
-        private double[] _constants;
-        private double _errorValue;
-        private int _evaluationCount;
+        TerminationReason _terminationReason;
+        double[] _constants;
+        double _errorValue;
+        int _evaluationCount;
 
         public RegressionResult(TerminationReason terminationReason, double[] constants, double errorValue, int evaluationCount)
         {

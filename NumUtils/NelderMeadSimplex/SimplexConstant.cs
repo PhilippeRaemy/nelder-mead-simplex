@@ -6,8 +6,8 @@ namespace NumUtils.NelderMeadSimplex
 {
     public sealed class SimplexConstant
     {
-        private double _value;
-        private double _initialPerturbation;
+        double _value;
+        double _initialPerturbation;
 
         public SimplexConstant(double value, double initialPerturbation)
         {
